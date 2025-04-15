@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -26,7 +25,7 @@ const LandingPage: React.FC = () => {
                   <Button asChild size="lg" variant="default" className="bg-white text-arogya-700 hover:bg-gray-100">
                     <Link to="/login">Patient Login</Link>
                   </Button>
-                  <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-arogya-600">
+                  <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-arogya-600/20 hover:text-white">
                     <Link to="/login">Doctor Login</Link>
                   </Button>
                 </div>
