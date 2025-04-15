@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
@@ -89,7 +88,11 @@ const LoginForm: React.FC = () => {
             />
           </div>
           
-          <Button type="submit" className="w-full arogya-gradient" disabled={isSubmitting}>
+          <Button 
+            type="submit" 
+            className="w-full arogya-gradient text-white" 
+            disabled={isSubmitting}
+          >
             {isSubmitting ? 'Logging in...' : 'Login'}
           </Button>
         </form>
