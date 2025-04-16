@@ -56,7 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signup = async (email: string, password: string, name: string, role: UserRole): Promise<boolean> => {
     try {
-      const { error } = await supabase.auth.signUp({
+      const { error, data } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -68,6 +68,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) throw error;
+
+      // Create profile in the respective table (patients or doctors)
+      if (data.user) {
+        const userId = data.user.id;
+        
+        if (role === 'patient') {
+          const { error: profileError } = await supabase
+            .from('patients')
+            .insert([{ id: userId, name, email }]);
+            
+          if (profileError) throw profileError;
+        } else if (role === 'doctor') {
+          const { error: profileError } = await supabase
+            .from('doctors')
+            .insert([{ 
+              id: userId, 
+              name, 
+              email, 
+              specialization: '', 
+              consultationFee: 0,
+              extraFeeForReport: 0
+            }]);
+            
+          if (profileError) throw profileError;
+        }
+      }
 
       toast.success('Sign up successful! Please check your email for verification.');
       return true;
@@ -89,7 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (data.user?.user_metadata.role !== role) {
         await supabase.auth.signOut();
-        toast.error('Invalid role selected for this account.');
+        toast.error(`Invalid role selected. This account is registered as a ${data.user?.user_metadata.role}.`);
         return false;
       }
 

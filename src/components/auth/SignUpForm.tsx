@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,36 +8,49 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { UserRole } from '@/types';
 
 const signUpSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
+  role: z.enum(['patient', 'doctor']).default('patient'),
 });
 
 type SignUpValues = z.infer<typeof signUpSchema>;
 
 const SignUpForm = () => {
   const navigate = useNavigate();
+  const { signup } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const form = useForm<SignUpValues>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
       name: '',
       email: '',
       password: '',
+      role: 'patient',
     },
   });
 
   const onSubmit = async (data: SignUpValues) => {
+    setIsSubmitting(true);
     try {
-      const { name, email, password } = data;
+      const { name, email, password, role } = data;
+      const success = await signup(email, password, name, role);
       
-      // We'll use the supabase client here once we set up the context
-      toast.success('Account created successfully! Please log in.');
-      navigate('/login');
+      if (success) {
+        toast.success('Account created successfully! Please log in.');
+        navigate('/login');
+      }
     } catch (error) {
       toast.error('Error creating account. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -94,8 +107,39 @@ const SignUpForm = () => {
               )}
             />
             
-            <Button type="submit" className="w-full arogya-gradient">
-              Sign Up
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel>Account Type</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="flex space-x-4"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="patient" id="patient" />
+                        <FormLabel htmlFor="patient" className="cursor-pointer">Patient</FormLabel>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="doctor" id="doctor" />
+                        <FormLabel htmlFor="doctor" className="cursor-pointer">Doctor</FormLabel>
+                      </div>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <Button 
+              type="submit" 
+              className="w-full arogya-gradient" 
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Creating Account...' : 'Sign Up'}
             </Button>
           </form>
         </Form>

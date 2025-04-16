@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
@@ -7,6 +8,7 @@ import { Label } from '../ui/label';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { useAuth } from '../../contexts/AuthContext';
 import { UserRole } from '../../types';
+import { toast } from 'sonner';
 
 const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -31,6 +33,9 @@ const LoginForm: React.FC = () => {
           navigate('/doctor/dashboard');
         }
       }
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error("Failed to login. Please check your credentials.");
     } finally {
       setIsSubmitting(false);
     }
@@ -56,11 +61,11 @@ const LoginForm: React.FC = () => {
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="patient" id="patient" />
-                <Label htmlFor="patient">Patient</Label>
+                <Label htmlFor="patient" className="cursor-pointer">Patient</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="doctor" id="doctor" />
-                <Label htmlFor="doctor">Doctor</Label>
+                <Label htmlFor="doctor" className="cursor-pointer">Doctor</Label>
               </div>
             </RadioGroup>
           </div>
@@ -97,9 +102,15 @@ const LoginForm: React.FC = () => {
           </Button>
         </form>
       </CardContent>
-      <CardFooter className="flex justify-center">
+      <CardFooter className="flex flex-col gap-2 items-center">
         <p className="text-sm text-gray-500">
-          For demo: Use rajiv.sharma@arogyamitra.com for doctor or aarav@example.com for patient
+          Don't have an account?{' '}
+          <Button variant="link" className="p-0" onClick={() => navigate('/signup')}>
+            Sign up
+          </Button>
+        </p>
+        <p className="text-xs text-gray-500">
+          For testing: Use doctor@example.com (doctor) or patient@example.com (patient) with password "password123"
         </p>
       </CardFooter>
     </Card>
