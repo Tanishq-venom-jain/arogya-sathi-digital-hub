@@ -15,14 +15,14 @@ const HeroSection: React.FC = () => {
               variant="outline" 
               className="bg-white text-[#1EAEDB] hover:bg-gray-100 px-8 py-3 text-lg"
             >
-              <Link to="/login">Patient Login</Link>
+              <Link to="/signup">Sign Up</Link>
             </Button>
             <Button 
               asChild 
               variant="outline" 
               className="bg-white text-[#1EAEDB] hover:bg-gray-100 px-8 py-3 text-lg"
             >
-              <Link to="/login">Doctor Login</Link>
+              <Link to="/login">Login</Link>
             </Button>
           </div>
         </div>

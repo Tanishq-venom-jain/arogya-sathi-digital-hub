@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +7,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { QrCodeProvider } from "./contexts/QrCodeContext";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
+import SignUpPage from "./pages/SignUpPage";
 import PatientDashboard from "./pages/patient/Dashboard";
 import DoctorDashboard from "./pages/doctor/Dashboard";
 import CreateReport from "./pages/doctor/CreateReport";
@@ -26,6 +26,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignUpPage />} />
               
               {/* Patient Routes */}
               <Route path="/patient/dashboard" element={<PatientDashboard />} />
