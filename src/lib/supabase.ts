@@ -1,11 +1,9 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
-}
+// Instead of using environment variables, we'll directly use the Supabase URL and anonymous key
+// You should replace these values with your actual Supabase project credentials
+const supabaseUrl = 'https://replace-with-your-actual-supabase-url.supabase.co';
+const supabaseAnonKey = 'replace-with-your-actual-supabase-anon-key';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
