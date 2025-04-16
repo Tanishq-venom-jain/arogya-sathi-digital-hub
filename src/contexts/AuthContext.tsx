@@ -1,14 +1,15 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole } from '../types';
-import { getUserByEmail } from '../data/mockData';
-import { toast } from '../components/ui/use-toast';
+import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string, role: UserRole) => Promise<boolean>;
-  logout: () => void;
+  signup: (email: string, password: string, name: string, role: UserRole) => Promise<boolean>;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -19,61 +20,96 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Check for stored user on component mount
-    const storedUser = localStorage.getItem('arogyaUser');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
+    // Check active session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email!,
+          name: session.user.user_metadata.name,
+          role: session.user.user_metadata.role,
+          createdAt: new Date(session.user.created_at),
+        });
+      }
+      setIsLoading(false);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email!,
+          name: session.user.user_metadata.name,
+          role: session.user.user_metadata.role,
+          createdAt: new Date(session.user.created_at),
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (email: string, password: string, role: UserRole): Promise<boolean> => {
-    setIsLoading(true);
-    
+  const signup = async (email: string, password: string, name: string, role: UserRole): Promise<boolean> => {
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // In a real app, we'd validate credentials with a backend
-      // For now, just check if the user exists and has the correct role
-      const foundUser = getUserByEmail(email);
-      
-      if (foundUser && foundUser.role === role) {
-        setUser(foundUser);
-        localStorage.setItem('arogyaUser', JSON.stringify(foundUser));
-        toast({
-          title: "Login successful",
-          description: `Welcome back, ${foundUser.name}!`,
-        });
-        return true;
-      } else {
-        toast({
-          title: "Login failed",
-          description: "Invalid email or password, or incorrect role selected.",
-          variant: "destructive"
-        });
-        return false;
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      toast({
-        title: "Login error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive"
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            role,
+          },
+        },
       });
+
+      if (error) throw error;
+
+      toast.success('Sign up successful! Please check your email for verification.');
+      return true;
+    } catch (error) {
+      console.error('Sign up error:', error);
+      toast.error('Failed to sign up. Please try again.');
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('arogyaUser');
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out.",
-    });
+  const login = async (email: string, password: string, role: UserRole): Promise<boolean> => {
+    try {
+      const { error, data } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      if (data.user?.user_metadata.role !== role) {
+        await supabase.auth.signOut();
+        toast.error('Invalid role selected for this account.');
+        return false;
+      }
+
+      toast.success('Login successful!');
+      return true;
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('Failed to login. Please check your credentials.');
+      return false;
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success('Logged out successfully');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('Failed to logout');
+    }
   };
 
   return (
@@ -81,6 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       user, 
       isLoading, 
       login, 
+      signup,
       logout, 
       isAuthenticated: !!user 
     }}>

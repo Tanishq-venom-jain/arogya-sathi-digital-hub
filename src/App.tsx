@@ -12,6 +12,7 @@ import PatientDashboard from "./pages/patient/Dashboard";
 import DoctorDashboard from "./pages/doctor/Dashboard";
 import CreateReport from "./pages/doctor/CreateReport";
 import NotFound from "./pages/NotFound";
+import PrivateRoute from "./components/auth/PrivateRoute";
 
 const queryClient = new QueryClient();
 
@@ -28,17 +29,73 @@ const App = () => (
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignUpPage />} />
               
-              {/* Patient Routes */}
-              <Route path="/patient/dashboard" element={<PatientDashboard />} />
-              <Route path="/patient/find-doctors" element={<PatientDashboard />} /> {/* Placeholder */}
-              <Route path="/patient/book-appointment" element={<PatientDashboard />} /> {/* Placeholder */}
-              <Route path="/patient/reports" element={<PatientDashboard />} /> {/* Placeholder */}
-              <Route path="/patient/report/:id" element={<PatientDashboard />} /> {/* Placeholder */}
+              {/* Protected Patient Routes */}
+              <Route
+                path="/patient/dashboard"
+                element={
+                  <PrivateRoute requiredRole="patient">
+                    <PatientDashboard />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/patient/find-doctors"
+                element={
+                  <PrivateRoute requiredRole="patient">
+                    <PatientDashboard />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/patient/book-appointment"
+                element={
+                  <PrivateRoute requiredRole="patient">
+                    <PatientDashboard />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/patient/reports"
+                element={
+                  <PrivateRoute requiredRole="patient">
+                    <PatientDashboard />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/patient/report/:id"
+                element={
+                  <PrivateRoute requiredRole="patient">
+                    <PatientDashboard />
+                  </PrivateRoute>
+                }
+              />
               
-              {/* Doctor Routes */}
-              <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
-              <Route path="/doctor/create-report" element={<CreateReport />} />
-              <Route path="/doctor/reports" element={<DoctorDashboard />} /> {/* Placeholder */}
+              {/* Protected Doctor Routes */}
+              <Route
+                path="/doctor/dashboard"
+                element={
+                  <PrivateRoute requiredRole="doctor">
+                    <DoctorDashboard />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/doctor/create-report"
+                element={
+                  <PrivateRoute requiredRole="doctor">
+                    <CreateReport />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/doctor/reports"
+                element={
+                  <PrivateRoute requiredRole="doctor">
+                    <DoctorDashboard />
+                  </PrivateRoute>
+                }
+              />
               
               {/* Fallback */}
               <Route path="*" element={<NotFound />} />
